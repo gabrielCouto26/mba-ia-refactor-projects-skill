@@ -1,7 +1,6 @@
 from database import db
 from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
-import hashlib
 from constants import UserRole
 
 class User(db.Model):
@@ -32,17 +31,7 @@ class User(db.Model):
         self.password = generate_password_hash(pwd)
 
     def check_password(self, pwd: str) -> bool:
-        # Check modern pbkdf2 / scrypt werkzeug hash
-        if self.password and (self.password.startswith('pbkdf2:') or self.password.startswith('scrypt:')):
-            return check_password_hash(self.password, pwd)
-        
-        # Legacy fallback for MD5 hash, and auto-upgrade
-        md5_hash = hashlib.md5(pwd.encode()).hexdigest()
-        if self.password == md5_hash:
-            self.set_password(pwd)
-            db.session.commit()
-            return True
-        return False
+        return bool(self.password) and check_password_hash(self.password, pwd)
 
     def is_admin(self) -> bool:
         return self.role == UserRole.ADMIN.value

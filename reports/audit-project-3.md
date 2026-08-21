@@ -179,3 +179,7 @@ A refatoração elevou o `task-manager-api` para uma organização significativa
 O projeto ainda possui pontos de evolução antes de ser considerado uma arquitetura plenamente madura: autenticação precisa de JWT real, segredos não devem ter fallback inseguro em produção, relatórios devem ser quebrados em serviços menores e consultas agregadas precisam substituir os N+1 remanescentes.
 
 Em termos da skill `refactor-arch`, o objetivo principal foi atingido: a aplicação saiu de um desenho parcialmente acoplado para uma estrutura MVC/Service Layer auditável, extensível e mais segura, com riscos residuais documentados para a próxima rodada de melhoria.
+
+## Segunda execução da skill (21/08/2026)
+
+A reauditoria confirmou que os fallbacks de `SECRET_KEY`/`JWT_SECRET`, o token fabricado e o fallback MD5 ainda eram riscos executáveis. Os segredos agora são exclusivamente ambientais e a configuração de produção falha fechada quando ausentes; MD5 foi removido e o token passou a ser assinado com `itsdangerous` e expiração. O boot de desenvolvimento respondeu `200` em `/health` e `/`; o teste de produção sem segredos falhou como esperado.

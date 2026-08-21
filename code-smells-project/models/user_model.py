@@ -42,12 +42,9 @@ def login_usuario(email, senha):
         return None
 
     stored_password = row["senha"]
-    # Check hashed password or fallback to plaintext comparison for legacy compatibility
-    is_valid = False
-    if stored_password.startswith("pbkdf2:") or stored_password.startswith("scrypt:"):
-        is_valid = check_password_hash(stored_password, senha)
-    else:
-        is_valid = (stored_password == senha)
+    is_valid = (
+        stored_password.startswith("pbkdf2:") or stored_password.startswith("scrypt:")
+    ) and check_password_hash(stored_password, senha)
 
     if is_valid:
         return row_to_dict(row)

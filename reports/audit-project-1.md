@@ -234,3 +234,7 @@ ENVIANDO SMS: Seu pedido foi recebido!
 ENVIANDO PUSH: Novo pedido recebido pelo sistema
 NOTIFICAÇÃO: Pedido 3 foi aprovado! Preparar envio.
 ```
+
+## Segunda execução da skill (21/08/2026)
+
+A reauditoria confirmou que o risco residual era real: `/admin/query` ainda aceitava SQL livre e a configuração tinha fallback de `SECRET_KEY`. A rota foi removida, `/admin/reset-db` passou a exigir Basic Auth com credenciais de ambiente e o fallback de senha plaintext foi removido. A suíte passou com `6` testes, incluindo `401` sem autenticação e `404` para a rota SQL removida.

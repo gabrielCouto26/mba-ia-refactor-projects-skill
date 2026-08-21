@@ -9,6 +9,8 @@ class TestConfig(Config):
     TESTING = True
     DATABASE_PATH = "test_loja.db"
     DEBUG = False
+    ADMIN_USERNAME = "test-admin"
+    ADMIN_PASSWORD = "test-admin-password"
 
 class AppTestCase(unittest.TestCase):
     @classmethod
@@ -51,6 +53,19 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.json["status"], "ok")
         self.assertEqual(res.json["database"], "connected")
+
+    def test_admin_routes_require_authentication_and_never_execute_sql(self):
+        res = self.client.post("/admin/reset-db")
+        self.assertEqual(res.status_code, 401)
+
+        res = self.client.post(
+            "/admin/reset-db",
+            auth=(TestConfig.ADMIN_USERNAME, TestConfig.ADMIN_PASSWORD)
+        )
+        self.assertEqual(res.status_code, 200)
+
+        res = self.client.post("/admin/query", json={"sql": "SELECT 1"})
+        self.assertEqual(res.status_code, 404)
 
     def test_produtos_crud(self):
         # List

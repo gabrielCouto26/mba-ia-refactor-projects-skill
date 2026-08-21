@@ -150,3 +150,7 @@ A refatoração atingiu todos os objetivos da skill `refactor-arch`:
 * Resolução completa do problema N+1 de queries SQL.
 * Introdução de Injeção de Dependências e tratamento de erro centralizado.
 * Manutenção de retrocompatibilidade com os contratos de API legados existentes.
+
+## Segunda execução da skill (21/08/2026)
+
+A reauditoria encontrou credenciais duplicadas em `src/utils.js` e `src/config/env.js`, além de `badCrypto` e valores padrão no fluxo legado `AppManager.js`. O módulo legado foi removido, os fallbacks foram eliminados, produção agora exige os quatro segredos de infraestrutura e o hash usa `scrypt` com salt aleatório. O boot Node foi executado com sucesso e o scan não encontrou `badCrypto`, credenciais hardcoded ou execução SQL livre.

@@ -144,6 +144,10 @@ npm start
 
 O servidor estará rodando em `http://localhost:3000`.
 
+## Segunda execução da skill `refactor-arch` (21/08/2026)
+
+Os segredos hardcoded e o fallback `badCrypto` foram removidos, assim como o módulo legado que ainda os continha. Em produção, `DB_USER`, `DB_PASS`, `PAYMENT_GATEWAY_KEY` e `SMTP_USER` são obrigatórios; o hash de senha usa `scrypt` com salt aleatório. O boot foi validado com Node e o scan não encontrou os padrões inseguros.
+
 ### Como Validar as Rotas (com cURL ou arquivo api.http)
 ```bash
 # Checkout com Sucesso

@@ -1,4 +1,4 @@
-from flask import jsonify, request, current_app
+from flask import jsonify
 from database import get_db
 from config import Config
 
@@ -34,29 +34,3 @@ def reset_database():
     db.commit()
     return jsonify({"mensagem": "Banco de dados resetado", "sucesso": True}), 200
 
-def executar_query():
-    # Restricted / Sanitized endpoint for administrative database queries
-    dados = request.get_json() or {}
-    query = dados.get("sql", "").strip()
-    
-    if not query:
-        return jsonify({"erro": "Query não informada"}), 400
-
-    # Block destructive/unauthorized SQL statements in raw query endpoint
-    forbidden_keywords = ["DROP", "ALTER", "TRUNCATE"]
-    if any(keyword in query.upper() for keyword in forbidden_keywords):
-        return jsonify({"erro": "Comando SQL não permitido"}), 403
-
-    db = get_db()
-    cursor = db.cursor()
-    try:
-        cursor.execute(query)
-        if query.upper().startswith("SELECT"):
-            rows = cursor.fetchall()
-            result = [dict(row) for row in rows]
-            return jsonify({"dados": result, "sucesso": True}), 200
-        else:
-            db.commit()
-            return jsonify({"mensagem": "Query executada", "sucesso": True}), 200
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500

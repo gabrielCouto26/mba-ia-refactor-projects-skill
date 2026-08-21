@@ -139,3 +139,9 @@ NOTIFICAÇÃO: Pedido 1 foi aprovado! Preparar envio.
    ```bash
    python -m unittest discover -s tests
    ```
+
+   ## Segunda execução da skill `refactor-arch` (21/08/2026)
+
+   As correções obrigatórias da Fase 3 foram reaplicadas após a auditoria detectar risco residual. A rota `/admin/query` foi removida por completo, `/admin/reset-db` exige credenciais administrativas configuradas por ambiente e `SECRET_KEY` não possui fallback. O login deixou de aceitar plaintext.
+
+   Validação executável: `6` testes passaram, incluindo `401` sem autenticação e `404` para `/admin/query`. A varredura dos três projetos não encontrou execução SQL controlada por request, `badCrypto`, MD5 ou fallbacks de segredo em código executável.

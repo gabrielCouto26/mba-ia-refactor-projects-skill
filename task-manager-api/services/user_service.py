@@ -1,7 +1,8 @@
+from flask import current_app
 from database import db
 from models.user import User
 from exceptions import NotFoundError, ConflictError, UnauthorizedError, ForbiddenError
-from config import Config
+from itsdangerous import URLSafeTimedSerializer
 
 class UserService:
     @staticmethod
@@ -96,7 +97,8 @@ class UserService:
         if not user.active:
             raise ForbiddenError('Usuário inativo')
 
-        token = f"jwt-token-{user.id}-{Config.JWT_SECRET[:8]}"
+        serializer = URLSafeTimedSerializer(current_app.config['JWT_SECRET'])
+        token = serializer.dumps({'sub': user.id, 'role': user.role})
         return {
             'message': 'Login realizado com sucesso',
             'user': user.to_dict(),

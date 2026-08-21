@@ -44,7 +44,12 @@ class CheckoutService {
         }
 
         // 3. Payment Processing Gateway Simulation
-        console.log(`Processando cartão ${cardNumber} na chave ${config.paymentGatewayKey}`);
+        if (!config.paymentGatewayKey) {
+            const error = new Error("Gateway de pagamento não configurado");
+            error.statusCode = 503;
+            throw error;
+        }
+        console.log("Processando pagamento pelo gateway configurado");
         const paymentStatus = cardNumber.startsWith(CARD_RULES.APPROVED_PREFIX)
             ? PAYMENT_STATUS.PAID
             : PAYMENT_STATUS.DENIED;

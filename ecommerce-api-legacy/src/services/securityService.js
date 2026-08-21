@@ -2,12 +2,15 @@ const crypto = require('crypto');
 
 class SecurityService {
     /**
-     * Secure password hashing using crypto sha256 with salt
+    * Password hashing using a random salt and the native scrypt implementation.
      */
     static hashPassword(password) {
-        if (!password) password = "default_password";
-        const hash = crypto.createHash('sha256').update(password + '_secret_salt').digest('hex');
-        return hash.substring(0, 16);
+        if (typeof password !== 'string' || password.length < 12) {
+            throw new Error("Password must contain at least 12 characters");
+        }
+        const salt = crypto.randomBytes(16).toString('hex');
+        const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+        return `scrypt:${salt}:${hash}`;
     }
 }
 

@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 app = Flask(__name__)
 
 app.config.from_object(Config)
+Config.validate()
 
 CORS(app)
 

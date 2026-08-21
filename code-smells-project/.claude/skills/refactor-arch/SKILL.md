@@ -27,13 +27,21 @@ Cross-reference the codebase against this exact catalog of 8 anti-patterns:
 # TRANSFORMATION PLAYBOOK
 Use the following 8 transformation patterns during the refactoring phase:
 1.  **MVC Separation:** Move routing to `routes/`, business logic to `controllers/`, and data access to `models/`.
-2.  **Config Extraction:** `const db = 'root:pass@localhost'` -> Extracted to a `config/` module using environment variables.
+2.  **Config Extraction:** `const db = 'root:pass@localhost'` -> Extracted to a `config/` module using environment variables. Secrets are mandatory at startup in production and must never have a credential-bearing fallback, example secret, or value derived from source code.
 3.  **Controller Slimming:** Extract core logic from the controller into dedicated Service files or fat Models.
 4.  **Dependency Injection:** Refactor hardcoded class instantiations to accept dependencies via constructors or parameters.
 5.  **Query Optimization:** Transform `loop { db.query(id) }` into single batch queries (e.g., `WHERE IN`).
 6.  **Validation Layering:** Introduce middleware or validation functions before the request hits the main Controller.
 7.  **Centralized Error Handling:** Replace scattered `try/catch` with a centralized global error handler mechanism.
 8.  **API Modernization:** Replace identified deprecated APIs with their modern, supported equivalents.
+
+### Mandatory Security Gates for Phase 3
+These are blocking acceptance criteria, not optional recommendations:
+
+* **No arbitrary SQL:** Remove administrative endpoints that accept SQL text or any other executable query language from a request. Do not claim mitigation by denying a keyword list, checking a prefix, or allowing only read statements. Replace the endpoint with explicit, parameterized administrative operations (or remove it).
+* **Real administrative authentication:** Every administrative route, including reset, diagnostics, exports, and maintenance operations, must enforce an actual authentication and authorization mechanism before entering the controller. The check must verify credentials or a signed, expiring token and an administrator role; route registration alone is not protection. Add tests for unauthenticated, authenticated non-admin, and authenticated admin requests.
+* **Zero secret fallbacks:** Secret values (`SECRET_KEY`, JWT/signing keys, database passwords, API keys, SMTP passwords, admin credentials) must be required from the environment or a secret manager. Missing production secrets must fail closed during configuration/bootstrap. Never retain plaintext, MD5, hardcoded, example, generated-from-source, or “legacy compatibility” fallbacks in executable code. Migration must be explicit and one-way, with legacy credentials rejected after the migration window.
+* **Validation evidence:** Before Phase 3 is reported complete, run a source scan and executable tests proving that no request-controlled SQL execution remains, protected routes reject missing/invalid authorization, and production configuration fails when required secrets are absent. A README or mock log cannot substitute for these checks.
 
 # EXECUTION WORKFLOW
 You must execute your tasks strictly in the following sequential phases.
@@ -62,12 +70,14 @@ Generate a detailed audit report:
 ## Phase 3: Refactoring & Validation
 Upon user confirmation, execute the refactoring:
 *   Apply the MVC pattern and execute fixes from the Transformation Playbook.
+*   Enforce all Mandatory Security Gates above. A compatibility wrapper is not acceptable when it preserves the vulnerable behavior.
 *   Present the new architectural directory structure.
 *   Provide a Validation Summary confirming:
     *   Application boot is successful.
     *   Original endpoints are responding correctly.
     *   Anti-patterns are successfully mitigated.
     *   Centralized error handling and configs are in place.
+    *   Security gates pass with executable evidence, including rejection of arbitrary SQL, authorization coverage for administrative routes, and fail-closed secret configuration.
 
 ## Phase 4: README Generation
 After refactoring, generate a comprehensive `README.md` containing the following sections exactly:
